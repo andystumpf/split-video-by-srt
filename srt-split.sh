@@ -40,7 +40,7 @@ then
    # put timecode string in calculatable date format and then calculate the length of the clip
    startDate=$(date -u -d "$startTime" +"%s.%N")
    endDate=$(date -u -d "$endTime" +"%s.%N")
-   timeDiff[i]=$(date -u -d "0 $endDate sec - $startDate sec" +"%H:%M:%S.%N")
+   timeDiff[i]=$(date -u -d "0 $endDate sec - ($startDate sec)" +"%H:%M:%S.%N")
 
    i=$[i+1]
   done < <(egrep "[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}" "$subtitleFile")
@@ -66,13 +66,13 @@ do
   if [ ! -z "$format" ]
   # assign the proper format to the output file to be passed to ffmpeg
   then
-    echo -n "Cutting segment no. ${k} of ${numOfClips} and exporting to ${format}..."
+    echo -n "Cutting segment no. ${k} of ${numOfClips} and exporting to ${format} length of ${timeDiff[j]}..."
     outputFile="$fileName-clips/${k}-$fileName.$format"
     else
     echo -n "Cutting segment no. ${k} of ${numOfClips} and exporting to original ${fileExt} format..."
     outputFile="$fileName-clips/${k}-$fileName.$fileExt"
   fi
-  ffmpeg -v warning -i "$fileToCut" -strict -2 -ss "${startTimeForFfmpeg[j]}" -t "${timeDiff[j]}" "$outputFile"
+  ffmpeg -v warning -i "$fileToCut" -strict -2 -ss "${startTimeForFfmpeg[j]}" -t "${timeDiff[j]}" -ac 1 -ar 22050 "$outputFile"
   if [ $? -eq 0 ]; then
     echo OK
   else
